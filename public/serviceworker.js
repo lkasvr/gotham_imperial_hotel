@@ -1,10 +1,7 @@
 self.addEventListener("fetch", function (event) {
-  if (event.request.url.includes("bootstrap.min.css")) {
+  if (event.request.url.includes("/img/logo.png")) {
     event.respondWith(
-      new Response(
-        ".hotel-slogan {background: green!important;} nav {display:none}",
-        { headers: { "Content-Type": "text/css" } }
-      )
+      fetch("/img/logo-flipped.png")
     );
   }
 });
