@@ -1,7 +1,16 @@
+var CACHE_NAME = "gih-cache";
+var CACHED_URLS = [
+  "/index-offline.html",
+  "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css",
+  "/css/gih-offline.css",
+  "/img/jumbo-background-sm.jpg",
+  "/img/logo-header.png"
+];
+
 self.addEventListener("install", function (event) {
   event.waitUntil(
-    caches.open("gih-cache").then(function (cache) {
-      return cache.add("/index-offline.html");
+    caches.open(CACHE_NAME).then(function (cache) {
+      return cache.addAll(CACHED_URLS);
     })
   );
 });
