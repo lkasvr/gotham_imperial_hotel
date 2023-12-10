@@ -1,4 +1,4 @@
-var CACHE_NAME = "gih-cache-v4";
+var CACHE_NAME = "gih-cache-v3";
 var CACHED_URLS = [
   "/index-offline.html",
   "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css",
@@ -72,6 +72,7 @@ self.addEventListener("fetch", function(event) {
   );
 });
 
+<<<<<<< HEAD
 self.addEventListener("activate", function (event) {
   event.waitUntil(
     caches.keys().then(function (cacheNames) {
@@ -79,8 +80,22 @@ self.addEventListener("activate", function (event) {
         cacheNames.map(function (cacheName) {
           if (CACHE_NAME !== cacheName && cacheName.startsWith("gih-cache"))
             return caches.delete(cacheName);
+=======
+self.addEventListener("activate", function(event) {
+  event.waitUntil(
+    caches.keys().then(function(cacheNames) {
+      return Promise.all(
+        cacheNames.map(function(cacheName) {
+          if (CACHE_NAME !== cacheName && cacheName.startsWith("gih-cache")) {
+            return caches.delete(cacheName);
+          }
+>>>>>>> ch05-start
         })
       );
     })
   );
+<<<<<<< HEAD
 });
+=======
+});
+>>>>>>> ch05-start
