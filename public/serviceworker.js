@@ -1,21 +1,30 @@
-var CACHE_NAME = "gih-cache-v3";
+var CACHE_NAME = "gih-cache-v4";
 var CACHED_URLS = [
-  "/index-offline.html",
+  // Our HTML
+  "/index.html",
+  // Stylesheets
+  "/css/gih.css",
   "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css",
-  "/css/gih-offline.css",
-  "/img/jumbo-background-sm.jpg",
-  "/img/logo-header.png"
+  "https://fonts.googleapis.com/css?family=Lato:300,600,900",
+  // Javascript
+  "https://code.jquery.com/jquery-3.0.0.min.js",
+  "/js/app.js",
+  // Images
+  "/img/logo.png",
+  "/img/logo-header.png",
+  "/img/event-calendar-link.jpg",
+  "/img/switch.png",
+  "/img/logo-top-background.png",
+  "/img/jumbo-background.jpg",
+  "/img/reservation-gih.jpg",
+  "/img/about-hotel-spa.jpg",
+  "/img/about-hotel-luxury.jpg",
+  "/img/event-default.jpg",
+  // JSON
+  "/events.json",
 ];
-
-var immutableRequests = [
-  "/fancy_header_background.mp4",
-  "/vendor/bootstrap/3.7.7/bootstrap.min.css",
-  "/css/style-v355.css"
-];
-var mutableRequests = [
-  "app-settings.json",
-  "index.html"
-];
+var googleMapsAPIJS = "https://maps.googleapis.com/maps/api/js?key="+
+  "AIzaSyDm9jndhfbcWByQnrivoaWAEQA8jy3COdE&callback=initMap";
 
 self.addEventListener("install", function(event) {
   event.waitUntil(
@@ -25,77 +34,88 @@ self.addEventListener("install", function(event) {
   );
 });
 
-self.addEventListener("install", function (event) {
-  event.waitUntil(
-    caches.open("gih-cache-v2").then(function (cache) {
-      var newImmutableRequests = [];
-      return Promise.all(
-        immutableRequests.map(function (url) {
-          return caches.match(url).then(function (response) {
-            if (response)
-              return cache.put(url, response);
-            
-            newImmutableRequests.push(url);
-            return Promise.resolve();
+self.addEventListener("fetch", function (event) {
+  var requestURL = new URL(event.request.url);
+  // Handle requests for index.html
+  if (requestURL.pathname === "/" || requestURL.pathname === "/index.html") {
+    event.respondWith(
+      caches.open(CACHE_NAME).then(function (cache) {
+        return cache.match("/index.html").then(function (cachedResponse) {
+
+          var fetchPromise = fetch("/index.html").then(function (networkResponse) {
+            cache.put("/index.html", networkResponse.clone());
+            return networkResponse;
           });
-        })
-      );
-    })
-  );
+
+          return cachedResponse || fetchPromise;
+        });
+      })
+    );
+    // Handl requests for Google Maps JavaScript API file
+  } else if (requestURL.href === googleMapsAPIJS) {
+    event.respondWith(
+      fetch(
+        googleMapsAPIJS+"&"+Date.now(),
+        { mode: "no-cors", cache: "no-store" }
+      ).catch(function() {
+        return caches.match("/js/offline-map.js");
+      })
+    );
+    // Handle requests for events JSON file
+  } else if (requestURL.href === "/events.json") {
+    event.respondWith(
+      caches.open(CACHE_NAME).then(function(cache) {
+        return fetch(event.request).then(function (networkResponse) {
+          cache.put(event.request, networkResponse.clone());
+          return networkResponse;
+        }).catch(function() {
+          return caches.match(event.request);
+        });
+      })
+    );
+    // Handle requests for event images.
+  } else if (requestURL.pathname.startsWith("/img/event-")) {
+    event.respondWith(
+      caches.open(CACHE_NAME).then(function(cache) {
+        return cache.match(event.request).then(function(cachedResponse) {
+          return cachedResponse ||
+            fetch(event.request).then(function (networkResponse) {
+            cache.put(event.request, networkResponse.clone());
+            return networkResponse;
+          }).catch(function () {
+            return caches.match("/img/event-default.png");
+          });
+        });
+      })
+    );
+    // Handle analytics requests
+  } else if (requestURL.host === "www.google-analytics.com") {
+    event.respondWith(fetch(event.request));
+    // Handle requests for files cached during installation
+  } else if (
+    CACHED_URLS.includes(requestURL.href) ||
+    CACHED_URLS.includes(requestURL.pathname)
+  ) {
+    event.respondWith(
+      caches.open(CACHE_NAME).then(function (cache) {
+        return cache.match(event.request).then(function (response) {
+          return response || fetch(event.request);
+        });
+      })
+    );
+  }
 });
 
-self.addEventListener("activate", function (event) {
-  event.waitUntil(
-    caches.keys().then(function (cacheNames) {
-      return Promise.all(
-        cacheNames.map(function (cacheName) {
-          if (CACHE_NAME !== cacheName && cacheName.startsWith("gih-cache")) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
-  );
-});
-
-self.addEventListener("fetch", function(event) {
-  event.respondWith(
-    fetch(event.request).catch(function() {
-      return caches.match(event.request).then(function(response) {
-        if (response) {
-          return response;
-        } else if (event.request.headers.get("accept").includes("text/html")) {
-          return caches.match("/index-offline.html");
-        }
-      });
-    })
-  );
-});
-
-<<<<<<< HEAD
-self.addEventListener("activate", function (event) {
-  event.waitUntil(
-    caches.keys().then(function (cacheNames) {
-      return Promise.all(
-        cacheNames.map(function (cacheName) {
-          if (CACHE_NAME !== cacheName && cacheName.startsWith("gih-cache"))
-            return caches.delete(cacheName);
-=======
 self.addEventListener("activate", function(event) {
   event.waitUntil(
-    caches.keys().then(function(cacheNames) {
+    caches.keys().then(function (cacheNames) {
       return Promise.all(
-        cacheNames.map(function(cacheName) {
+        cacheNames.map(function (cacheName) {
           if (CACHE_NAME !== cacheName && cacheName.startsWith("gih-cache")) {
             return caches.delete(cacheName);
           }
->>>>>>> ch05-start
         })
       );
     })
   );
-<<<<<<< HEAD
 });
-=======
-});
->>>>>>> ch05-start
