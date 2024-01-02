@@ -9,6 +9,7 @@ var CACHED_URLS = [
   "https://fonts.googleapis.com/css?family=Lato:300,600,900",
   // JavaScript
   "https://code.jquery.com/jquery-3.0.0.min.js",
+  "/js/reservations-store.js",
   "/js/app.js",
   "/js/offline-map.js",
   "/js/my-account.js",
