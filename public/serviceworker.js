@@ -1,4 +1,4 @@
-var CACHE_NAME = "gih-cache-v4";
+var CACHE_NAME = "gih-cache-v5";
 var CACHED_URLS = [
   // Our HTML
   "/index.html",
@@ -33,6 +33,7 @@ var googleMapsAPIJS = "https://maps.googleapis.com/maps/api/js?key="+
   "AIzaSyDm9jndhfbcWByQnrivoaWAEQA8jy3COdE&callback=initMap";
 
 self.addEventListener("install", function(event) {
+  // Cache everything in CACHED_URLS. Installation fails if anything fails to cache
   event.waitUntil(
     caches.open(CACHE_NAME).then(function(cache) {
       return cache.addAll(CACHED_URLS);
@@ -40,41 +41,41 @@ self.addEventListener("install", function(event) {
   );
 });
 
-self.addEventListener("fetch", function (event) {
+self.addEventListener("fetch", function(event) {
   var requestURL = new URL(event.request.url);
   // Handle requests for index.html
   if (requestURL.pathname === "/" || requestURL.pathname === "/index.html") {
     event.respondWith(
-      caches.open(CACHE_NAME).then(function (cache) {
-        return cache.match("/index.html").then(function (cachedResponse) {
-
-          var fetchPromise = fetch("/index.html").then(function (networkResponse) {
+      caches.open(CACHE_NAME).then(function(cache) {
+        return cache.match("/index.html").then(function(cachedResponse) {
+          var fetchPromise = fetch("/index.html").then(function(networkResponse) {
             cache.put("/index.html", networkResponse.clone());
             return networkResponse;
           });
-
           return cachedResponse || fetchPromise;
         });
       })
     );
-  } else if (requestURL.pathname === '/my-account') {
+  // Handle requests for my account page
+  } else if (requestURL.pathname === "/my-account") {
     event.respondWith(
-      caches.match("/my-account.html").then(function (response) {
+      caches.match("/my-account.html").then(function(response) {
         return response || fetch("/my-account.html");
       })
-      );
-    } else if (requestURL.pathname === '/reservations.json') {
+    );
+  // Handle requests for reservations JSON file
+  } else if (requestURL.pathname === "/reservations.json") {
     event.respondWith(
-      caches.open(CACHE_NAME).then(function (cache) {
-        return fetch(event.request).then(function (networkResponse) {
+      caches.open(CACHE_NAME).then(function(cache) {
+        return fetch(event.request).then(function(networkResponse) {
           cache.put(event.request, networkResponse.clone());
           return networkResponse;
-        }).catch(function () {
+        }).catch(function() {
           return caches.match(event.request);
         });
       })
     );
-      // Handl requests for Google Maps JavaScript API file
+  // Handle requests for Google Maps JavaScript API file
   } else if (requestURL.href === googleMapsAPIJS) {
     event.respondWith(
       fetch(
@@ -84,11 +85,11 @@ self.addEventListener("fetch", function (event) {
         return caches.match("/js/offline-map.js");
       })
     );
-    // Handle requests for events JSON file
-  } else if (requestURL.href === "/events.json") {
+  // Handle requests for events JSON file
+  } else if (requestURL.pathname === "/events.json") {
     event.respondWith(
       caches.open(CACHE_NAME).then(function(cache) {
-        return fetch(event.request).then(function (networkResponse) {
+        return fetch(event.request).then(function(networkResponse) {
           cache.put(event.request, networkResponse.clone());
           return networkResponse;
         }).catch(function() {
@@ -96,32 +97,31 @@ self.addEventListener("fetch", function (event) {
         });
       })
     );
-    // Handle requests for event images.
+  // Handle requests for event images.
   } else if (requestURL.pathname.startsWith("/img/event-")) {
     event.respondWith(
       caches.open(CACHE_NAME).then(function(cache) {
-        return cache.match(event.request).then(function(cachedResponse) {
-          return cachedResponse ||
-            fetch(event.request).then(function (networkResponse) {
+        return cache.match(event.request).then(function(cacheResponse) {
+          return cacheResponse||fetch(event.request).then(function(networkResponse) {
             cache.put(event.request, networkResponse.clone());
             return networkResponse;
-          }).catch(function () {
-            return caches.match("/img/event-default.png");
+          }).catch(function() {
+            return cache.match("/img/event-default.jpg");
           });
         });
       })
     );
-    // Handle analytics requests
+  // Handle analytics requests
   } else if (requestURL.host === "www.google-analytics.com") {
     event.respondWith(fetch(event.request));
-    // Handle requests for files cached during installation
+  // Handle requests for files cached during installation
   } else if (
     CACHED_URLS.includes(requestURL.href) ||
     CACHED_URLS.includes(requestURL.pathname)
   ) {
     event.respondWith(
-      caches.open(CACHE_NAME).then(function (cache) {
-        return cache.match(event.request).then(function (response) {
+      caches.open(CACHE_NAME).then(function(cache) {
+        return cache.match(event.request).then(function(response) {
           return response || fetch(event.request);
         });
       })
