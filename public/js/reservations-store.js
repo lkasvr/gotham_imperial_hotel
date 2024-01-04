@@ -4,9 +4,9 @@ var DB_NAME = "gih-reservations";
 var openDatabase = function () {
   return new Promise(function (resolve, reject) {
     // Make sure IndexedDB is supported before attempting to use it
-    if (!window.indexedDB) reject("IndexedDB not supported");
+    if (!self.indexedDB) reject("IndexedDB not supported");
 
-    var request = window.indexedDB.open(DB_NAME, DB_VERSION);
+    var request = self.indexedDB.open(DB_NAME, DB_VERSION);
 
     request.onerror = function (event) {
       console.log("Database Error: ", event.target.errorCode);
@@ -97,6 +97,14 @@ var getReservations = function () {
 
 var getReservationsFromServer = function () {
   return new Promise(function (resolve) {
-    $.getJSON("/reservations.json", resolve);
+    if (self.$) {
+      $.getJSON("/reservations.json", resolve);
+    } else if (self.fetch) {
+      fetch("/reservations").then(function (response) {
+        return response.json();
+      }).then(function (reservations) {
+        resolve(reservations);
+      });
+    }
   });
 };
