@@ -11,7 +11,6 @@ var CACHED_URLS = [
   "https://fonts.googleapis.com/css?family=Lato:300,600,900",
   // JavaScript
   "https://code.jquery.com/jquery-3.0.0.min.js",
-  "/js/reservations-store.js",
   "/js/app.js",
   "/js/offline-map.js",
   "/js/my-account.js",
@@ -135,9 +134,9 @@ self.addEventListener("fetch", function(event) {
 
 self.addEventListener("activate", function(event) {
   event.waitUntil(
-    caches.keys().then(function (cacheNames) {
+    caches.keys().then(function(cacheNames) {
       return Promise.all(
-        cacheNames.map(function (cacheName) {
+        cacheNames.map(function(cacheName) {
           if (CACHE_NAME !== cacheName && cacheName.startsWith("gih-cache")) {
             return caches.delete(cacheName);
           }
@@ -150,13 +149,13 @@ self.addEventListener("activate", function(event) {
 var createReservationUrl = function(reservationDetails) {
   var reservationUrl = new URL("http://localhost:8443/make-reservation");
   Object.keys(reservationDetails).forEach(function(key) {
-    reservationUrl.searchParams.append(key, encodeURIComponent(reservationDetails[key]));
+    reservationUrl.searchParams.append(key, reservationDetails[key]);
   });
   return reservationUrl;
 };
 
 var syncReservations = function() {
-  return getReservations("idex_status", "Sending").then(function(reservations) {
+  return getReservations("idx_status", "Sending").then(function(reservations) {
     return Promise.all(
       reservations.map(function(reservation) {
         var reservationUrl = createReservationUrl(reservation);
@@ -175,7 +174,7 @@ var syncReservations = function() {
 };
 
 self.addEventListener("sync", function(event) {
-  if(event.tag === "sync-reservations") {
+  if (event.tag === "sync-reservations") {
     event.waitUntil(syncReservations());
   }
 });
