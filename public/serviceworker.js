@@ -15,6 +15,7 @@ var CACHED_URLS = [
   "/js/app.js",
   "/js/offline-map.js",
   "/js/my-account.js",
+  "/js/reservations-store.js",
   // Images
   "/img/logo.png",
   "/img/logo-header.png",
