@@ -1,4 +1,4 @@
-var DB_VERSION = 1;
+var DB_VERSION = 3;
 var DB_NAME = "gih-reservations";
 
 var openDatabase = function() {
@@ -14,10 +14,18 @@ var openDatabase = function() {
 
     request.onupgradeneeded = function(event) {
       var db = event.target.result;
+      var upgradeTransaction = event.target.transaction;
+      var reservationStore;
       if (!db.objectStoreNames.contains("reservations")) {
-        db.createObjectStore("reservations",
+        reservationStore = db.createObjectStore("reservations",
           { keyPath: "id" }
         );
+      } else {
+        reservationStore = upgradeTransaction.objectStore("reservations");
+      }
+
+      if(!reservationStore.indexNames.contains("idx_status")) {
+        reservationStore.createIndex("idx_status", "status", { unique: false });
       }
     };
 
@@ -65,12 +73,18 @@ var updateInObjectStore = function(storeName, id, object) {
   });
 };
 
-var getReservations = function() {
+var getReservations = function(indexName, indexValue) {
   return new Promise(function(resolve) {
     openDatabase().then(function(db) {
       var objectStore = openObjectStore(db, "reservations");
       var reservations = [];
-      objectStore.openCursor().onsuccess = function(event) {
+      var cursor;
+      if(indexName && indexValue) {
+        cursor = objectStore.index(indexName).openCursor(indexValue);
+      } else {
+        cursor = objectStore.openCursor();
+      }
+      cursor.onsuccess = function(event) {
         var cursor = event.target.result;
         if (cursor) {
           reservations.push(cursor.value);
