@@ -47,12 +47,7 @@ var addReservation = function(id, arrivalDate, nights, guests) {
   };
   addToObjectStore("reservations", reservationDetails);
   renderReservation(reservationDetails);
-<<<<<<< HEAD
-
-  if("serviceWorker" in navigator && "SyncManager" in window) {
-=======
   if ("serviceWorker" in navigator && "SyncManager" in window) {
->>>>>>> ch08-start
     navigator.serviceWorker.ready.then(function(registration) {
       registration.sync.register("sync-reservations");
     });
