@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 var DB_VERSION = 3;
+=======
+var DB_VERSION = 2;
+>>>>>>> ch08-start
 var DB_NAME = "gih-reservations";
 
 var openDatabase = function() {
@@ -15,6 +19,7 @@ var openDatabase = function() {
     request.onupgradeneeded = function(event) {
       var db = event.target.result;
       var upgradeTransaction = event.target.transaction;
+<<<<<<< HEAD
       var reservationStore;
       if (!db.objectStoreNames.contains("reservations")) {
         reservationStore = db.createObjectStore("reservations",
@@ -26,6 +31,19 @@ var openDatabase = function() {
 
       if(!reservationStore.indexNames.contains("idx_status")) {
         reservationStore.createIndex("idx_status", "status", { unique: false });
+=======
+      var reservationsStore;
+      if (!db.objectStoreNames.contains("reservations")) {
+        reservationsStore = db.createObjectStore("reservations",
+          { keyPath: "id" }
+        );
+      } else {
+        reservationsStore = upgradeTransaction.objectStore("reservations");
+      }
+
+      if (!reservationsStore.indexNames.contains("idx_status")) {
+        reservationsStore.createIndex("idx_status", "status", { unique: false });
+>>>>>>> ch08-start
       }
     };
 
@@ -79,7 +97,11 @@ var getReservations = function(indexName, indexValue) {
       var objectStore = openObjectStore(db, "reservations");
       var reservations = [];
       var cursor;
+<<<<<<< HEAD
       if(indexName && indexValue) {
+=======
+      if (indexName && indexValue) {
+>>>>>>> ch08-start
         cursor = objectStore.index(indexName).openCursor(indexValue);
       } else {
         cursor = objectStore.openCursor();
