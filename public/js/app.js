@@ -20,14 +20,11 @@ $(document).ready(function () {
         updateReservationDisplay(data.reservation);
       }
     });
-  }
-
-  if ("serviceWorker" in navigator) {
-    $("#logout-button").click(function (event) {
+    $("#logout-button").click(function(event) {
       if (navigator.serviceWorker.controller) {
         event.preventDefault();
         navigator.serviceWorker.controller.postMessage(
-          { action: "logout" }
+          {action: "logout"}
         );
       }
     });

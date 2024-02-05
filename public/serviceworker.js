@@ -154,6 +154,16 @@ var createReservationUrl = function(reservationDetails) {
   return reservationUrl;
 };
 
+var postReservationDetails = function(reservation) {
+  self.clients.matchAll({ includeUncontrolled: true }).then(function(clients) {
+    clients.forEach(function(client) {
+      client.postMessage(
+        {action: "update-reservation", reservation: reservation}
+      );
+    });
+  });
+};
+
 var syncReservations = function() {
   return getReservations("idx_status", "Sending").then(function(reservations) {
     return Promise.all(
@@ -166,7 +176,11 @@ var syncReservations = function() {
             "reservations",
             newReservation.id,
             newReservation
+<<<<<<< HEAD
           ).then(function () {
+=======
+          ).then(function() {
+>>>>>>> ch09-start
             postReservationDetails(newReservation);
           });
         });
@@ -191,11 +205,19 @@ self.addEventListener("sync", function(event) {
   }
 });
 
+<<<<<<< HEAD
 self.addEventListener("message", function (event) {
   var data = event.data;
   if (data.action === "logout") {
     self.clients.matchAll().then(function (clients) {
       clients.forEach(function (client) {
+=======
+self.addEventListener("message", function(event) {
+  var data = event.data;
+  if (data.action === "logout") {
+    self.clients.matchAll().then(function(clients) {
+      clients.forEach(function(client) {
+>>>>>>> ch09-start
         if (client.url.includes("/my-account")) {
           client.postMessage(
             {action: "navigate", url: "/"}
